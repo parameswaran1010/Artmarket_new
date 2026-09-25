@@ -9,11 +9,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background:       "var(--background)",
+        surface:          "var(--surface)",
+        border:           "var(--border)",
+        "text-primary":   "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        accent:           "var(--accent)",
+        "accent-hover":   "var(--accent-hover)",
+        success:          "var(--success)",
+        error:            "var(--error)",
       },
     },
   },
   plugins: [],
 };
+
 export default config;

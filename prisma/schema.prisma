@@ -1,0 +1,108 @@
+// Prisma schema for ArtMarket
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Represents a platform user — can be an artist, buyer, or admin
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role       @default(buyer)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+
+  artworks  Artwork[]
+  orders    Order[]
+  cartItems CartItem[]
+  wishlist  WishlistItem[]
+}
+
+// A piece of art created by an artist (User with role artist)
+model Artwork {
+  id          String        @id @default(cuid())
+  artistId    String
+  title       String
+  description String
+  medium      String // e.g. "Oil on canvas", "Digital"
+  style       String // e.g. "Abstract", "Realism"
+  tags        String[]
+  price       Decimal       @db.Decimal(10, 2)
+  imageUrl    String
+  status      ArtworkStatus @default(AVAILABLE)
+  createdAt   DateTime      @default(now())
+
+  artist    User           @relation(fields: [artistId], references: [id])
+  orders    Order[]
+  cartItems CartItem[]
+  wishlist  WishlistItem[]
+}
+
+// A completed purchase linking a buyer to an artwork
+model Order {
+  id        String      @id @default(cuid())
+  buyerId   String
+  artworkId String
+  price     Decimal     @db.Decimal(10, 2)
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  buyer   User    @relation(fields: [buyerId], references: [id])
+  artwork Artwork @relation(fields: [artworkId], references: [id])
+}
+
+// An item a buyer has added to their shopping cart
+model CartItem {
+  id        String @id @default(cuid())
+  buyerId   String
+  artworkId String
+
+  buyer   User    @relation(fields: [buyerId], references: [id])
+  artwork Artwork @relation(fields: [artworkId], references: [id])
+
+  @@unique([buyerId, artworkId])
+}
+
+// An item a buyer has saved to their wishlist
+model WishlistItem {
+  id        String @id @default(cuid())
+  buyerId   String
+  artworkId String
+
+  buyer   User    @relation(fields: [buyerId], references: [id])
+  artwork Artwork @relation(fields: [artworkId], references: [id])
+
+  @@unique([buyerId, artworkId])
+}
+
+enum Role {
+  artist
+  buyer
+  admin
+}
+
+enum ArtworkStatus {
+  AVAILABLE
+  SOLD
+  HIDDEN
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
