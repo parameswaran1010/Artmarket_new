@@ -27,6 +27,10 @@ export const authOptions: NextAuthOptions = {
 
         if (!passwordMatch) return null;
 
+        if (user.status === "SUSPENDED") {
+          throw new Error("AccountSuspended");
+        }
+
         return {
           id: user.id,
           name: user.name,

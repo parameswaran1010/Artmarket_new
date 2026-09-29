@@ -10,8 +10,8 @@ import Button from "@/components/ui/Button";
 
 const roleDashboard: Record<string, string> = {
   artist: "/dashboard/artist",
-  buyer:  "/dashboard/buyer",
-  admin:  "/dashboard/admin",
+  buyer: "/dashboard/buyer",
+  admin: "/dashboard/admin",
 };
 
 function LoginForm() {
@@ -35,7 +35,11 @@ function LoginForm() {
       });
 
       if (!result || result.error) {
-        setError("Invalid email or password.");
+        if (result?.error === "AccountSuspended") {
+          setError("suspended");
+        } else {
+          setError("Invalid email or password.");
+        }
         setLoading(false);
         return;
       }
@@ -94,9 +98,16 @@ function LoginForm() {
             required
           />
 
-          {error && (
+          {error === "suspended" ? (
+            <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3">
+              <p className="text-sm font-semibold text-amber-800">Account suspended</p>
+              <p className="text-sm text-amber-700 mt-0.5">
+                Your account has been suspended.
+              </p>
+            </div>
+          ) : error ? (
             <p className="text-sm text-error">{error}</p>
-          )}
+          ) : null}
 
           <Button type="submit" disabled={loading} className="w-full mt-1">
             {loading ? "Logging in..." : "Log in"}
